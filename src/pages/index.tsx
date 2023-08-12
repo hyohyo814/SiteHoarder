@@ -1,14 +1,10 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
-import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
-import { sitesRouter } from "~/server/api/routers/sites";
 import { api } from "~/utils/api";
 import { type NextPage } from "next";
 import { PageLayout } from "~/components/layout";
-import { filterMetadata } from "~/server/helpers/filterMetadata";
 import React, { useState } from "react";
-import { contextProps } from "@trpc/react-query/shared";
 import { toast } from "react-hot-toast";
 
 const ModDash = () => {
@@ -77,7 +73,7 @@ const SiteForm = () => {
 };
 
 const Home: NextPage = () => {
-  const { user, isSignedIn, isLoaded: userLoaded } = useUser();
+  const { isSignedIn, isLoaded: userLoaded } = useUser();
 
 
 

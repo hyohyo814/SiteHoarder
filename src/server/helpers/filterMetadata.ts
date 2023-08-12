@@ -1,6 +1,5 @@
 import urlMetadata from "url-metadata";
 import { type Site } from "@prisma/client";
-import { RouterInputs } from "~/utils/api";
 import { url_domain } from "./domainExtract";
 import { TRPCError } from "@trpc/server";
 import toast from "react-hot-toast";
