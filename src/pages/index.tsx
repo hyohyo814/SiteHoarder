@@ -7,24 +7,71 @@ import { api } from "~/utils/api";
 import { type NextPage } from "next";
 import { PageLayout } from "~/components/layout";
 import { filterMetadata } from "~/server/helpers/filterMetadata";
+import React, { useState } from "react";
+import { contextProps } from "@trpc/react-query/shared";
+import { toast } from "react-hot-toast";
 
 const ModDash = () => {
   const { data, isLoading: sitesLoading } = api.sites.getAll.useQuery();
-  if (sitesLoading) return <div>Loading sites</div>
-  if (!data) return <div>Something went wrong!</div>
+  if (sitesLoading) return <div>Loading sites</div>;
+  if (!data) return <div>Something went wrong!</div>;
 
   return (
-    <div className="flex overflow-y-scroll p-4 flex-wrap no-scrollbar justify-around  w-full">
-      {[...data, ...data, ...data, ...data]?.map((content) => (
+    <div className="no-scrollbar flex w-full flex-wrap justify-center overflow-y-scroll  p-4">
+      {data?.map((content) => (
+        <Link key={content.id} href={content.url}>
           <Image
             src={`/api/og?title=${content.name}&desc=${content.description}`}
             width={1200}
             height={630}
             alt={`${content.name} image`}
-            className="rounded-2xl md:w-[600px] md:h-[315px] p-3 mb-4 shadow-sm shadow-slate-600 md:hover:shadow-slate-300"
-            key={content.id}
+            className="m-4 rounded-2xl p-3 shadow-sm shadow-slate-600 md:h-[315px] md:w-[600px] md:hover:shadow-slate-300"
           />
+        </Link>
       ))}
+    </div>
+  );
+};
+
+const SiteForm = () => {
+  const [input, setInput] = useState("");
+  const ctx = api.useContext();
+  
+  const { mutate } = api.sites.create.useMutation({
+    onSuccess: () => {
+      void ctx.sites.getAll.invalidate()
+    },
+    onError: (e) => {
+      const errMsg = e.data?.zodError?.fieldErrors.content;
+      if (errMsg?.[0]) {
+        toast.error(errMsg[0]!);
+      } else {
+        toast.error("Failed to add site.");
+      }
+    },
+  });
+
+
+  return (
+    <div>
+      <form onSubmit={function(e: React.SyntheticEvent) {
+        e.preventDefault();
+        if (input !== "") {
+          mutate({ content: input })
+        }
+      }}>
+        <input
+          placeholder="Add a new site here!"
+          className="grow bg-transparent outline-none"
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button
+          type="submit"
+          className="bg-slate-700 shadow-sm shadow-slate-400 px-3 rounded-xl"
+        >Add</button>
+      </form>
     </div>
   );
 };
@@ -32,17 +79,16 @@ const ModDash = () => {
 const Home: NextPage = () => {
   const { user, isSignedIn, isLoaded: userLoaded } = useUser();
 
-  if (!userLoaded) return <div />
 
-  console.log(user?.id);
 
-  filterMetadata('https://react-hot-toast.com');
+  if (!userLoaded) return <div />;
 
   return (
     <PageLayout>
-      <div className="h-24 border-b-2 p-2 bg-slate-600">
+      <div className="h-24 border-b-2 bg-slate-600 p-2">
         {!!isSignedIn && <SignOutButton />}
         {!isSignedIn && <SignInButton />}
+        <SiteForm />
       </div>
       <ModDash />
     </PageLayout>

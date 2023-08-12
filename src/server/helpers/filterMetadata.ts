@@ -1,22 +1,52 @@
 import urlMetadata from "url-metadata";
 import { type Site } from "@prisma/client";
+import { RouterInputs } from "~/utils/api";
+import { url_domain } from "./domainExtract";
+import { TRPCError } from "@trpc/server";
+import toast from "react-hot-toast";
 
-export function filterMetadata(link: string) {
+type SiteInput = Omit<Site, "id"|"userId">;
+
+export async function filterMetadata(link: string) {
   const url = link;
   
   if (!url) return null;
 
-  urlMetadata(url, {
+  const metadata = await urlMetadata(url, {
     mode: 'cors',
     requestHeaders: {},
-    includeResponseBody: true
   })
   .then((metadata) => {
-    console.log(metadata)
+    console.log(metadata);
+    const nameOpt = metadata['application-name'] as string
+      ?? url_domain(link);
+
+    return {
+      name: nameOpt,
+      url: metadata['og:url'] as string,
+      description: metadata.description as string
+    }
   },
   (e) => {
-    console.error(e)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    toast.error(e);
   })
 
-  return 
+  if (!metadata) throw new TRPCError({
+    code: 'BAD_REQUEST'
+  });
+
+  console.log(metadata);
+
+  const filteredObject: SiteInput = {
+    url: link,
+    name: metadata.name,
+    description: metadata.description.length < 90
+      ? metadata.description
+      : metadata.description.slice(0, 89) + '...'
+  }
+
+  console.log(filteredObject);
+
+  return filteredObject;
 };
