@@ -35,5 +35,24 @@ export const sitesRouter = createTRPCRouter({
     });
 
     return siteComplete;
+  }),
+
+  delete: privateProcedure.input(
+    z.object({
+      content: z.string(),
+    })
+  )
+  .mutation(async({ctx, input}) => {
+    const userId = ctx.userId;
+    if (!userId) throw new TRPCError({
+      code: 'UNAUTHORIZED'
+    });
+
+    await ctx.prisma.site.delete({
+      where: {
+        id: input.content,
+        userId: userId,
+      }
+    })
   })
 });
