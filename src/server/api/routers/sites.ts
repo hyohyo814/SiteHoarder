@@ -27,10 +27,10 @@ export const sitesRouter = createTRPCRouter({
 
     const siteComplete = await ctx.prisma.site.create({
       data: {
-        userId: userId,
+        url: siteMeta.url,
         name: siteMeta.name,
         description: siteMeta.description,
-        url: siteMeta.url
+        userId: userId,
       },
     });
 

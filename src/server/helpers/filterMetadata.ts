@@ -23,7 +23,7 @@ export async function filterMetadata(link: string) {
     return {
       name: nameOpt,
       url: metadata['og:url'] as string,
-      description: metadata.description as string
+      description: metadata.description as string,
     }
   },
   (e) => {
@@ -35,7 +35,6 @@ export async function filterMetadata(link: string) {
     code: 'BAD_REQUEST'
   });
 
-  console.log(metadata);
 
   const filteredObject: SiteInput = {
     url: link,
