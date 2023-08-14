@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { api } from "~/utils/api";
 import { LoadingPage, LoadingSpinner } from "./loading";
-import React, { useState } from "react";
+import React from "react";
 import { toast } from "react-hot-toast";
 
 export default function ModDash() {
